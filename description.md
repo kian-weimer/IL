@@ -629,7 +629,7 @@ guarded-transitions style.
  :inv (= sig (= s on))
  :init (and
     (= n 0)
-    (ite press (= s on) (s off))
+    (ite press (= s on) (= s off))
   )
  :trans (and
    (=> (and (= s off) (not press'))
@@ -664,7 +664,7 @@ Another variant but in equational style.
    (= s' (ite press' (flip s)
             (ite (or (= s off) (>= n 10)) off
               on)))
-   (= n' (ite (or (= s off) (s' off)) 0
+   (= n' (ite (or (= s off) (= s' off)) 0
             (+ n 1)))
   )
 )
@@ -683,7 +683,7 @@ with a non-deterministic  choice.
  :input ( (r1 Bool) (r2 Bool) )
  :output ( (g1 Bool) (g2 Bool) )
  :local ( (s Bool) )
- :init ( (not g1) (not g2) )  ; nothing is granted initially
+ :init (and (not g1) (not g2))  ; nothing is granted initially
  :trans (and
   (=> (and (not r1') (not r2'))
       (and (not g1') (not g2')))
@@ -707,8 +707,8 @@ a cycle later and does not use a local variable for the non-deterministic choice
  :input ( (r1 Bool) (r2 Bool) )
  :output ( (g1 Bool) (g2 Bool) )
  :local ( (s Bool) )
- :init ( (not g1) (not g2) )  ; nothing is granted initially
- :trans (
+ :init (and (not g1) (not g2) )  ; nothing is granted initially
+ :trans (and
     (=> (and (not r1) (not r2))
         (and (not g1') (not g2')))
     (=> (and r1 (not r2))
@@ -716,7 +716,7 @@ a cycle later and does not use a local variable for the non-deterministic choice
     (=> (and (not r1) r2)
         (and (not g1') g2'))
     (=> (and r1 r2)
-        (!= g1' g2'))
+        (not (= g1' g2')))
   )
 )
 ```
@@ -728,8 +728,8 @@ Similar to <tt>NonDetArbiter</tt> but for requests expressed as integer events.
   :input ( (r1 (Event Int)) (r2 (Event Int)) )
   :output ( (g1 (Event Int)) (g2 (Event Int)) )
   :local ( (s Bool) )
-  :init ( (= g1 g2 none) )
-  :trans (
+  :init (= g1 g2 none)
+  :trans (and
     (=> (= r1' r2' none)
         (= g1' g2' none))
     (=> (and (!= r1' none) (= r2' none))
@@ -1223,7 +1223,7 @@ in the query in a different state.
    ; a2 <=> no grants
    (= a2 (and (not g1) (not g2)))
    ; b <=> c is 4
-   (= b (= c 4))
+   (= b (= c1 4))
  )
 )
 
